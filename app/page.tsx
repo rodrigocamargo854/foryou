@@ -115,7 +115,7 @@ export default function Page() {
             <h1 className="mt-4 text-4xl font-black leading-tight">Você é importante.</h1>
 
             <p className="mt-3 text-[15px] leading-relaxed text-zinc-700">
-              O Espírito faz florescer o melhor em você.
+              O Espírito Santo faz florescer o melhor em você.
             </p>
           </div>
 
