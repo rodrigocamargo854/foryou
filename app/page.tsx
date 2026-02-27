@@ -37,7 +37,7 @@ export default function Page() {
   const [particles, setParticles] = useState<Particle[]>([])
   const [power, setPower] = useState(1)
 
-  // segurança: não deixa acumular infinito
+  // limites pra não acumular memória
   const MAX_PARTICLES = 260
   const MAX_POWER = 10
 
@@ -47,30 +47,28 @@ export default function Page() {
   }, [])
 
   function celebrate() {
-    const palette = ['#ffffff', '#60a5fa', '#22d3ee', '#34d399', '#fde047', '#a78bfa']
+    const palette = ['#111827', '#1d4ed8', '#0ea5e9', '#16a34a', '#f59e0b', '#7c3aed']
 
     const nextPower = Math.min(power + 1, MAX_POWER)
     setPower(nextPower)
 
-    // cresce a cada clique, mas com teto
-    const count = 18 + nextPower * 10 // 28, 38, 48... até o teto
+    const count = 18 + nextPower * 10
 
     const created: Particle[] = Array.from({ length: count }).map(() => {
-      // distribuição radial
       const angle = Math.random() * Math.PI * 2
-      const radius = 140 + Math.random() * 220 // distância final
+      const radius = 140 + Math.random() * 220
       const dx = Math.cos(angle) * radius
       const dy = Math.sin(angle) * radius
 
       return {
         id: uid(),
         size: 6 + Math.random() * 10,
-        duration: 650 + Math.random() * 650, // ms
+        duration: 650 + Math.random() * 650,
         dx,
         dy,
         color: palette[Math.floor(Math.random() * palette.length)],
         blur: Math.random() < 0.25 ? 6 : 0,
-        opacity: 0.7 + Math.random() * 0.3
+        opacity: 0.75 + Math.random() * 0.25
       }
     })
 
@@ -82,13 +80,13 @@ export default function Page() {
   }
 
   return (
-    <main className="relative min-h-screen w-full overflow-hidden text-white">
-      {/* Background animado (alegre e moderno) */}
+    <main className="relative min-h-screen w-full overflow-hidden text-zinc-900">
+      {/* Background animado (claro/alegre) */}
       <div className="absolute inset-0 animated-bg" />
       <div className="absolute inset-0 opacity-35 bg-[radial-gradient(circle_at_15%_15%,white,transparent_35%),radial-gradient(circle_at_85%_18%,white,transparent_40%),radial-gradient(circle_at_35%_90%,white,transparent_45%)]" />
 
-      {/* grid bem suave */}
-      <div className="pointer-events-none absolute inset-0 opacity-[0.10] [background-image:linear-gradient(to_right,rgba(255,255,255,0.10)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.10)_1px,transparent_1px)] [background-size:28px_28px]" />
+      {/* grid suave */}
+      <div className="pointer-events-none absolute inset-0 opacity-[0.10] [background-image:linear-gradient(to_right,rgba(0,0,0,0.10)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.10)_1px,transparent_1px)] [background-size:28px_28px]" />
 
       {/* Centro com “respiração” de luz */}
       <div className="pointer-events-none absolute inset-0">
@@ -122,32 +120,32 @@ export default function Page() {
 
       {/* Conteúdo */}
       <div className="relative z-10 mx-auto flex min-h-screen max-w-md items-center px-5 py-10">
-        <section className="w-full rounded-3xl border border-white/20 bg-white/10 p-7 shadow-[0_25px_80px_rgba(0,0,0,0.35)] backdrop-blur-2xl">
+        <section className="w-full rounded-3xl border border-black/10 bg-white/45 p-7 shadow-[0_25px_80px_rgba(0,0,0,0.20)] backdrop-blur-2xl">
           <div className="text-center">
-            <div className="mx-auto inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[12px] font-semibold tracking-wide text-white/80">
+            <div className="mx-auto inline-flex items-center rounded-full border border-black/10 bg-white/40 px-3 py-1.5 text-[12px] font-semibold tracking-wide text-zinc-700">
               Para você
             </div>
 
-            <h1 className="mt-4 text-4xl font-black leading-tight tracking-tight">
+            <h1 className="mt-4 text-4xl font-black leading-tight tracking-tight text-zinc-950">
               Você é importante.
             </h1>
 
-            <p className="mt-3 text-[15px] leading-relaxed text-white/75">
+            <p className="mt-3 text-[15px] leading-relaxed text-zinc-700">
               O Espírito faz crescer o melhor em você.
             </p>
           </div>
 
-          <div className="mt-6 h-px w-full bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+          <div className="mt-6 h-px w-full bg-gradient-to-r from-transparent via-black/10 to-transparent" />
 
           {showFruits && (
             <div className="mt-5">
-              <p className="text-sm font-bold text-white/90">Frutos do Espírito</p>
+              <p className="text-sm font-bold text-zinc-900">Frutos do Espírito</p>
 
               <div className="mt-3 flex flex-wrap gap-2">
                 {fruits.map((fruit) => (
                   <span
                     key={fruit}
-                    className="rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[12px] font-semibold text-white/80"
+                    className="rounded-full border border-black/10 bg-white/35 px-3 py-1.5 text-[12px] font-semibold text-zinc-800"
                   >
                     {fruit}
                   </span>
@@ -159,14 +157,12 @@ export default function Page() {
           <div className="mt-7">
             <button
               onClick={celebrate}
-              className="w-full rounded-2xl bg-white px-4 py-4 text-[14px] font-extrabold tracking-tight text-zinc-950 shadow-lg active:scale-[0.98]"
+              className="w-full rounded-2xl bg-zinc-950 px-4 py-4 text-[14px] font-extrabold tracking-tight text-white shadow-lg active:scale-[0.98]"
             >
               Celebrar
             </button>
 
-            <p className="mt-4 text-center text-xs text-white/60">
-              Você tem valor. Sempre.
-            </p>
+            <p className="mt-4 text-center text-xs text-zinc-600">Você tem valor. Sempre.</p>
           </div>
         </section>
       </div>
@@ -174,15 +170,21 @@ export default function Page() {
       {/* CSS global */}
       <style jsx global>{`
         .animated-bg {
-          background: linear-gradient(-45deg, #2563eb, #22d3ee, #34d399, #fde047, #a78bfa);
+          background: linear-gradient(-45deg, #93c5fd, #67e8f9, #86efac, #fde68a, #c4b5fd);
           background-size: 450% 450%;
           animation: gradientMove 12s ease infinite;
         }
 
         @keyframes gradientMove {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
+          0% {
+            background-position: 0% 50%;
+          }
+          50% {
+            background-position: 100% 50%;
+          }
+          100% {
+            background-position: 0% 50%;
+          }
         }
 
         .center-glow {
@@ -193,15 +195,22 @@ export default function Page() {
           height: 560px;
           transform: translate(-50%, -50%);
           border-radius: 9999px;
-          background: radial-gradient(circle, rgba(255,255,255,0.18), rgba(255,255,255,0.00) 60%);
-          filter: blur(10px);
+          background: radial-gradient(circle, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0) 62%);
+          filter: blur(12px);
           animation: breathe 2.4s ease-in-out infinite;
-          opacity: 0.9;
+          opacity: 0.95;
         }
 
         @keyframes breathe {
-          0%, 100% { transform: translate(-50%, -50%) scale(0.96); opacity: 0.85; }
-          50% { transform: translate(-50%, -50%) scale(1.02); opacity: 1; }
+          0%,
+          100% {
+            transform: translate(-50%, -50%) scale(0.96);
+            opacity: 0.85;
+          }
+          50% {
+            transform: translate(-50%, -50%) scale(1.02);
+            opacity: 1;
+          }
         }
 
         .particle {
@@ -213,7 +222,7 @@ export default function Page() {
           animation-name: burst;
           animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
           animation-fill-mode: forwards;
-          box-shadow: 0 0 18px rgba(255,255,255,0.25);
+          box-shadow: 0 0 18px rgba(0, 0, 0, 0.12);
         }
 
         @keyframes burst {
