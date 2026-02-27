@@ -2,14 +2,19 @@
 
 import { useEffect, useMemo, useState } from 'react'
 
-type Star = {
+type Particle = {
   id: string
-  left: number
   size: number
   duration: number
-  drift: number
-  spin: number
+  dx: number
+  dy: number
   color: string
+  blur: number
+  opacity: number
+}
+
+function uid() {
+  return Math.random().toString(16).slice(2) + Date.now().toString(16)
 }
 
 export default function Page() {
@@ -29,107 +34,120 @@ export default function Page() {
   )
 
   const [showFruits, setShowFruits] = useState(false)
-  const [stars, setStars] = useState<Star[]>([])
+  const [particles, setParticles] = useState<Particle[]>([])
   const [power, setPower] = useState(1)
 
-  // limite seguro para não explodir memória
-  const MAX_STARS = 220
+  // segurança: não deixa acumular infinito
+  const MAX_PARTICLES = 260
   const MAX_POWER = 10
 
   useEffect(() => {
-    const t = setTimeout(() => setShowFruits(true), 600)
+    const t = setTimeout(() => setShowFruits(true), 550)
     return () => clearTimeout(t)
   }, [])
 
-  function rainStars() {
-    const colors = ['#2563eb', '#16a34a', '#f59e0b', '#7c3aed', '#06b6d4', '#f97316']
+  function celebrate() {
+    const palette = ['#ffffff', '#60a5fa', '#22d3ee', '#34d399', '#fde047', '#a78bfa']
 
-    // calcula o próximo power (cresce a cada clique, com teto)
     const nextPower = Math.min(power + 1, MAX_POWER)
     setPower(nextPower)
 
-    // quantidade cresce a cada clique
-    const count = 16 + nextPower * 7 // 23, 30, 37... até o teto
+    // cresce a cada clique, mas com teto
+    const count = 18 + nextPower * 10 // 28, 38, 48... até o teto
 
-    const newStars: Star[] = Array.from({ length: count }).map(() => ({
-      id: Math.random().toString(16).slice(2) + Date.now().toString(16),
-      left: Math.random() * 100,
-      size: 12 + Math.random() * 18,
-      duration: 2.8 + Math.random() * 2.0,
-      drift: (Math.random() - 0.5) * 140,
-      spin: (Math.random() - 0.5) * 220,
-      color: colors[Math.floor(Math.random() * colors.length)]
-    }))
+    const created: Particle[] = Array.from({ length: count }).map(() => {
+      // distribuição radial
+      const angle = Math.random() * Math.PI * 2
+      const radius = 140 + Math.random() * 220 // distância final
+      const dx = Math.cos(angle) * radius
+      const dy = Math.sin(angle) * radius
 
-    // adiciona mantendo um limite para não crescer infinito
-    setStars((prev) => {
-      const merged = [...prev, ...newStars]
-      if (merged.length <= MAX_STARS) return merged
-      return merged.slice(merged.length - MAX_STARS) // mantém as mais recentes
+      return {
+        id: uid(),
+        size: 6 + Math.random() * 10,
+        duration: 650 + Math.random() * 650, // ms
+        dx,
+        dy,
+        color: palette[Math.floor(Math.random() * palette.length)],
+        blur: Math.random() < 0.25 ? 6 : 0,
+        opacity: 0.7 + Math.random() * 0.3
+      }
+    })
+
+    setParticles((prev) => {
+      const merged = [...prev, ...created]
+      if (merged.length <= MAX_PARTICLES) return merged
+      return merged.slice(merged.length - MAX_PARTICLES)
     })
   }
 
   return (
-    <main className="relative min-h-screen w-full overflow-hidden text-zinc-900">
-      {/* Fundo alegre neutro */}
-      <div className="absolute inset-0 bg-gradient-to-br from-sky-300 via-cyan-300 to-amber-200" />
-      <div className="absolute inset-0 opacity-40 bg-[radial-gradient(circle_at_15%_15%,white,transparent_35%),radial-gradient(circle_at_85%_20%,white,transparent_40%),radial-gradient(circle_at_35%_90%,white,transparent_45%)]" />
-      <div className="pointer-events-none absolute inset-0 opacity-[0.10] [background-image:linear-gradient(to_right,rgba(0,0,0,0.10)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,0,0,0.10)_1px,transparent_1px)] [background-size:28px_28px]" />
+    <main className="relative min-h-screen w-full overflow-hidden text-white">
+      {/* Background animado (alegre e moderno) */}
+      <div className="absolute inset-0 animated-bg" />
+      <div className="absolute inset-0 opacity-35 bg-[radial-gradient(circle_at_15%_15%,white,transparent_35%),radial-gradient(circle_at_85%_18%,white,transparent_40%),radial-gradient(circle_at_35%_90%,white,transparent_45%)]" />
 
-      {/* Estrelas caindo (aumenta a cada clique, com limite de memória) */}
+      {/* grid bem suave */}
+      <div className="pointer-events-none absolute inset-0 opacity-[0.10] [background-image:linear-gradient(to_right,rgba(255,255,255,0.10)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.10)_1px,transparent_1px)] [background-size:28px_28px]" />
+
+      {/* Centro com “respiração” de luz */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="center-glow" />
+      </div>
+
+      {/* Partículas expandindo do centro */}
       <div className="pointer-events-none absolute inset-0 z-20">
-        {stars.map((star) => (
+        {particles.map((p) => (
           <div
-            key={star.id}
-            // remove cada estrela quando a animação termina (não acumula)
-            onAnimationEnd={() => {
-              setStars((prev) => prev.filter((s) => s.id !== star.id))
-            }}
-            style={{
-              position: 'absolute',
-              left: `${star.left}vw`,
-              top: '-50px',
-              width: star.size,
-              height: star.size,
-              backgroundColor: star.color,
-              clipPath:
-                'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)',
-              animation: `fall ${star.duration}s linear forwards`,
-              boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
-              transform: `rotate(${star.spin}deg)`,
-              // @ts-ignore
-              '--drift': `${star.drift}px`
-            }}
+            key={p.id}
+            onAnimationEnd={() => setParticles((prev) => prev.filter((x) => x.id !== p.id))}
+            className="particle"
+            style={
+              {
+                width: p.size,
+                height: p.size,
+                backgroundColor: p.color,
+                opacity: p.opacity,
+                filter: p.blur ? `blur(${p.blur}px)` : 'none',
+                animationDuration: `${p.duration}ms`,
+                // @ts-ignore
+                '--dx': `${p.dx}px`,
+                // @ts-ignore
+                '--dy': `${p.dy}px`
+              } as React.CSSProperties
+            }
           />
         ))}
       </div>
 
       {/* Conteúdo */}
       <div className="relative z-10 mx-auto flex min-h-screen max-w-md items-center px-5 py-10">
-        <section className="w-full rounded-3xl border border-white/60 bg-white/40 p-6 shadow-xl backdrop-blur-xl">
+        <section className="w-full rounded-3xl border border-white/20 bg-white/10 p-7 shadow-[0_25px_80px_rgba(0,0,0,0.35)] backdrop-blur-2xl">
           <div className="text-center">
-            <div className="mx-auto inline-flex items-center rounded-full border border-white/60 bg-white/40 px-3 py-1.5 text-[12px] font-semibold tracking-wide">
+            <div className="mx-auto inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[12px] font-semibold tracking-wide text-white/80">
               Para você
             </div>
 
-            <h1 className="mt-4 text-4xl font-black leading-tight">Você é importante.</h1>
+            <h1 className="mt-4 text-4xl font-black leading-tight tracking-tight">
+              Você é importante.
+            </h1>
 
-            <p className="mt-3 text-[15px] leading-relaxed text-zinc-700">
-              O Espírito Santo faz florescer o melhor em você.
+            <p className="mt-3 text-[15px] leading-relaxed text-white/75">
+              O Espírito faz crescer o melhor em você.
             </p>
           </div>
 
-          <div className="mt-6 h-px w-full bg-gradient-to-r from-transparent via-white to-transparent" />
+          <div className="mt-6 h-px w-full bg-gradient-to-r from-transparent via-white/25 to-transparent" />
 
           {showFruits && (
             <div className="mt-5">
-              <p className="text-sm font-bold text-zinc-800">Frutos do Espírito</p>
+              <p className="text-sm font-bold text-white/90">Frutos do Espírito</p>
 
               <div className="mt-3 flex flex-wrap gap-2">
                 {fruits.map((fruit) => (
                   <span
                     key={fruit}
-                    className="rounded-full border border-white/70 bg-white/50 px-3 py-1.5 text-[12px] font-semibold text-zinc-800"
+                    className="rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[12px] font-semibold text-white/80"
                   >
                     {fruit}
                   </span>
@@ -140,29 +158,74 @@ export default function Page() {
 
           <div className="mt-7">
             <button
-              onClick={rainStars}
-              className="w-full rounded-2xl bg-zinc-900 px-4 py-4 text-[14px] font-extrabold text-white shadow-lg active:scale-[0.98]"
+              onClick={celebrate}
+              className="w-full rounded-2xl bg-white px-4 py-4 text-[14px] font-extrabold tracking-tight text-zinc-950 shadow-lg active:scale-[0.98]"
             >
               Celebrar
             </button>
 
-            <p className="mt-4 text-center text-xs text-zinc-600">Você tem valor. Sempre.</p>
+            <p className="mt-4 text-center text-xs text-white/60">
+              Você tem valor. Sempre.
+            </p>
           </div>
         </section>
       </div>
 
-      {/* Animação */}
+      {/* CSS global */}
       <style jsx global>{`
-        @keyframes fall {
+        .animated-bg {
+          background: linear-gradient(-45deg, #2563eb, #22d3ee, #34d399, #fde047, #a78bfa);
+          background-size: 450% 450%;
+          animation: gradientMove 12s ease infinite;
+        }
+
+        @keyframes gradientMove {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+
+        .center-glow {
+          position: absolute;
+          left: 50%;
+          top: 42%;
+          width: 560px;
+          height: 560px;
+          transform: translate(-50%, -50%);
+          border-radius: 9999px;
+          background: radial-gradient(circle, rgba(255,255,255,0.18), rgba(255,255,255,0.00) 60%);
+          filter: blur(10px);
+          animation: breathe 2.4s ease-in-out infinite;
+          opacity: 0.9;
+        }
+
+        @keyframes breathe {
+          0%, 100% { transform: translate(-50%, -50%) scale(0.96); opacity: 0.85; }
+          50% { transform: translate(-50%, -50%) scale(1.02); opacity: 1; }
+        }
+
+        .particle {
+          position: absolute;
+          left: 50%;
+          top: 42%;
+          border-radius: 9999px;
+          transform: translate(-50%, -50%);
+          animation-name: burst;
+          animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+          animation-fill-mode: forwards;
+          box-shadow: 0 0 18px rgba(255,255,255,0.25);
+        }
+
+        @keyframes burst {
           0% {
-            transform: translate3d(0, 0, 0) rotate(0deg);
+            transform: translate(-50%, -50%) translate3d(0, 0, 0) scale(1);
             opacity: 0;
           }
           10% {
             opacity: 1;
           }
           100% {
-            transform: translate3d(var(--drift, 0px), 115vh, 0) rotate(0deg);
+            transform: translate(-50%, -50%) translate3d(var(--dx), var(--dy), 0) scale(0.7);
             opacity: 0;
           }
         }
