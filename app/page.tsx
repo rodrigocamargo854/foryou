@@ -79,7 +79,7 @@ export default function Page() {
           </h1>
 
           <p className="mt-4 text-zinc-700 text-sm">
-            O Espírito Santo faz crescer o melhor em você.
+            O Espírito faz crescer o melhor em você.
           </p>
 
           <div className="mt-6 flex flex-wrap gap-2 justify-center">
@@ -97,7 +97,7 @@ export default function Page() {
             onClick={celebrate}
             className="mt-8 w-full py-4 rounded-2xl bg-black text-white font-bold"
           >
-            Celebrar
+            try
           </button>
         </div>
       </div>
