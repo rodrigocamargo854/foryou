@@ -130,7 +130,7 @@ export default function Page() {
               onClick={celebrate}
               className="mt-8 w-full rounded-2xl bg-zinc-950 px-4 py-4 text-[14px] font-extrabold tracking-tight text-white shadow-lg active:scale-[0.98]"
             >
-              Celebrar
+              Click
             </button>
 
             <p className="mt-4 text-center text-xs text-zinc-600">
