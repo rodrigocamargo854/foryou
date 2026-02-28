@@ -1,15 +1,14 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 
 type Particle = {
   id: string
-  size: number
   duration: number
   dx: number
   dy: number
   color: string
-  opacity: number
+  size: number
 }
 
 function uid() {
@@ -28,12 +27,11 @@ function AnimatedBorderCard({ children }: { children: React.ReactNode }) {
         .animated-ring {
           background: conic-gradient(
             from 0deg,
-            rgba(37, 99, 235, 0) 0deg,
-            rgba(34, 211, 238, 0.8) 70deg,
-            rgba(52, 211, 153, 0.8) 140deg,
-            rgba(253, 224, 71, 0.8) 210deg,
-            rgba(167, 139, 250, 0.8) 280deg,
-            rgba(37, 99, 235, 0.8) 360deg
+            rgba(34, 211, 238, 0.8),
+            rgba(52, 211, 153, 0.8),
+            rgba(253, 224, 71, 0.8),
+            rgba(167, 139, 250, 0.8),
+            rgba(34, 211, 238, 0.8)
           );
           filter: blur(10px);
           animation: ringSpin 6s linear infinite;
@@ -55,41 +53,29 @@ export default function Page() {
   const lines = useMemo(() => ['Fomos chamados', 'filhos de Deus.'], [])
 
   const [particles, setParticles] = useState<Particle[]>([])
-  const [power, setPower] = useState(1)
-  const [pulseBoost, setPulseBoost] = useState(false)
-
-  const MAX_PARTICLES = 220
-  const MAX_POWER = 10
+  const [boost, setBoost] = useState(false)
 
   function celebrate() {
-    setPulseBoost(true)
-    setTimeout(() => setPulseBoost(false), 300)
+    setBoost(true)
+    setTimeout(() => setBoost(false), 300)
 
-    const palette = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#a855f7']
-    const nextPower = Math.min(power + 1, MAX_POWER)
-    setPower(nextPower)
+    const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#a855f7']
 
-    const count = 18 + nextPower * 8
-
-    const created: Particle[] = Array.from({ length: count }).map(() => {
+    const created: Particle[] = Array.from({ length: 30 }).map(() => {
       const angle = Math.random() * Math.PI * 2
-      const radius = 120 + Math.random() * 200
+      const radius = 120 + Math.random() * 180
+
       return {
         id: uid(),
-        size: 6 + Math.random() * 10,
-        duration: 600 + Math.random() * 600,
+        duration: 800 + Math.random() * 600,
         dx: Math.cos(angle) * radius,
         dy: Math.sin(angle) * radius,
-        color: palette[Math.floor(Math.random() * palette.length)],
-        opacity: 0.8
+        color: colors[Math.floor(Math.random() * colors.length)],
+        size: 10 + Math.random() * 8
       }
     })
 
-    setParticles((prev) => {
-      const merged = [...prev, ...created]
-      if (merged.length <= MAX_PARTICLES) return merged
-      return merged.slice(merged.length - MAX_PARTICLES)
-    })
+    setParticles((prev) => [...prev, ...created])
   }
 
   return (
@@ -98,19 +84,20 @@ export default function Page() {
       {/* Background */}
       <div className="absolute inset-0 animated-bg" />
 
-      {/* Partículas */}
+      {/* Mini corações */}
       <div className="pointer-events-none absolute inset-0 z-20">
         {particles.map((p) => (
           <div
             key={p.id}
-            onAnimationEnd={() => setParticles((prev) => prev.filter((x) => x.id !== p.id))}
+            onAnimationEnd={() =>
+              setParticles((prev) => prev.filter((x) => x.id !== p.id))
+            }
             className="particle"
             style={
               {
                 width: p.size,
                 height: p.size,
-                backgroundColor: p.color,
-                opacity: p.opacity,
+                color: p.color,
                 animationDuration: `${p.duration}ms`,
                 // @ts-ignore
                 '--dx': `${p.dx}px`,
@@ -134,16 +121,16 @@ export default function Page() {
               Olha o amor que Deus nos deu.
             </p>
 
-            {/* Coração */}
+            {/* Coração principal */}
             <div className="mt-8 flex justify-center">
-              <div className={`heart ${pulseBoost ? 'heart-boost' : ''}`} />
+              <div className={`heart ${boost ? 'heart-boost' : ''}`} />
             </div>
 
             <button
               onClick={celebrate}
               className="mt-8 w-full rounded-2xl bg-zinc-950 px-4 py-4 text-[14px] font-extrabold tracking-tight text-white shadow-lg active:scale-[0.98]"
             >
-              clique  
+              Celebrar
             </button>
 
             <p className="mt-4 text-center text-xs text-zinc-600">
@@ -168,32 +155,31 @@ export default function Page() {
         }
 
         .heart {
-          width: 48px;
-          height: 48px;
+          width: 52px;
+          height: 52px;
           background: #ef4444;
           transform: rotate(-45deg);
           position: relative;
           animation: pulse 1.6s infinite;
-          border-radius: 6px;
         }
 
         .heart::before,
         .heart::after {
           content: '';
           position: absolute;
-          width: 48px;
-          height: 48px;
+          width: 52px;
+          height: 52px;
           background: #ef4444;
           border-radius: 50%;
         }
 
         .heart::before {
-          top: -24px;
+          top: -26px;
           left: 0;
         }
 
         .heart::after {
-          left: 24px;
+          left: 26px;
           top: 0;
         }
 
@@ -212,24 +198,45 @@ export default function Page() {
           100% { transform: rotate(-45deg) scale(1); }
         }
 
+        /* Mini corações */
         .particle {
           position: absolute;
           left: 50%;
           top: 45%;
-          border-radius: 9999px;
-          transform: translate(-50%, -50%);
+          transform: translate(-50%, -50%) rotate(-45deg);
+          background: currentColor;
           animation-name: burst;
           animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
           animation-fill-mode: forwards;
         }
 
+        .particle::before,
+        .particle::after {
+          content: '';
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          background: currentColor;
+          border-radius: 50%;
+        }
+
+        .particle::before {
+          top: -50%;
+          left: 0;
+        }
+
+        .particle::after {
+          left: 50%;
+          top: 0;
+        }
+
         @keyframes burst {
           0% {
-            transform: translate(-50%, -50%) translate3d(0,0,0);
+            transform: translate(-50%, -50%) rotate(-45deg);
             opacity: 1;
           }
           100% {
-            transform: translate(-50%, -50%) translate3d(var(--dx), var(--dy), 0);
+            transform: translate(-50%, -50%) translate3d(var(--dx), var(--dy), 0) rotate(-45deg);
             opacity: 0;
           }
         }
